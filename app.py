@@ -18,10 +18,11 @@ def download_file_from_huggingface(url, filename):
 BASE_URL = "https://huggingface.co/shubhamprabhukhanolkar/mental-health-sentiment-models/resolve/main/"
 model_urls = {
     'LSTM': BASE_URL + 'lstm_sentiment_model.keras',
-    'BiLSTM': BASE_URL + 'best_sentiment_model.keras',
+    'BiLSTM': BASE_URL + 'bilstm_sentiment_model.keras',
     'CNN-BiLSTM': BASE_URL + 'cnn_bilstm_mental_health_sentiment_model.keras',
     'Multi-View': BASE_URL + 'multi_view_hierarchical_sentiment_model.keras'
 }
+
 tokenizer_url = BASE_URL + 'tokenizer.pickle'
 
 # Download and load tokenizer
