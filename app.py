@@ -25,58 +25,74 @@ model_urls = {
 
 tokenizer_url = BASE_URL + 'tokenizer.pickle'
 
-# Download and load tokenizer
-download_file_from_huggingface(tokenizer_url, 'tokenizer.pickle')
-with open('tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
+classes = ['Normal', 'Depression', 'Suicidal', 'Anxiety','Bipolar','Stress','Personality disorder']
+    
+MAX_SEQUENCE_LENGTH = 150
 
-# Download and load models
-models = {}
-for name, url in model_urls.items():
-    filename = url.split("/")[-1]
-    download_file_from_huggingface(url, filename)
-    models[name] = load_model(filename)
 
-# Preprocessing functions
+def download_file_from_huggingface(url, filename):
+    """Download a file from Hugging Face if it doesn't exist."""
+    if not os.path.exists(filename):
+        st.write(f"📥 Downloading {filename}...")
+        r = requests.get(url)
+        with open(filename, 'wb') as f:
+            f.write(r.content)
+
 def preprocess_text(text):
-    # Basic preprocessing - you can use your full function here
+    """Minimal preprocessing. Replace with your full preprocessing if needed."""
     text = text.lower()
     return text
 
 def remove_stopwords_simple(text):
-    return text  # Simplify here or add your real stopword removal if needed
+    """Placeholder for stopword removal. Customize if needed."""
+    return text
 
-MAX_SEQUENCE_LENGTH = 150
-
-# Prediction function
 def predict_sentiment(text, model):
+    """Predict sentiment from text using the selected model."""
     processed_text = preprocess_text(text)
     processed_text = remove_stopwords_simple(processed_text)
     sequence = tokenizer.texts_to_sequences([processed_text])
     padded_sequence = pad_sequences(sequence, maxlen=MAX_SEQUENCE_LENGTH, padding='post')
     prediction = model.predict(padded_sequence)[0]
-    classes = ['Normal', 'Depression', 'Suicidal', 'Anxiety','Bipolar','Stress','Personality disorder']
     top_class_index = np.argmax(prediction)
     top_class = classes[top_class_index]
     confidence = prediction[top_class_index]
     return top_class, confidence, dict(zip(classes, prediction.tolist()))
 
-# Streamlit App
-st.title("🧠 Mental Health Sentiment Prediction")
+# --------------- APP SETUP ---------------
 
-st.write("Enter your text below and select a model:")
+st.title("🧠 Mental Health Sentiment Prediction App")
 
-user_input = st.text_area("Your text here...", height=150)
-model_choice = st.selectbox("Select Model:", list(models.keys()))
+# Download tokenizer
+with st.spinner('🔄 Loading tokenizer...'):
+    download_file_from_huggingface(tokenizer_url, 'tokenizer.pickle')
+    with open('tokenizer.pickle', 'rb') as handle:
+        tokenizer = pickle.load(handle)
+
+# Download and load models
+models = {}
+with st.spinner('🔄 Loading models...'):
+    for name, url in model_urls.items():
+        filename = url.split("/")[-1]
+        download_file_from_huggingface(url, filename)
+        models[name] = load_model(filename, compile=False)  # 👈 IMPORTANT: compile=False
+
+st.success("✅ Models and Tokenizer Loaded!")
+
+# --------------- APP INTERFACE ---------------
+
+user_input = st.text_area("📝 Enter your sentiment text here:", height=150)
+model_choice = st.selectbox("🤖 Select a Model:", list(models.keys()))
 
 if st.button("Predict"):
     if user_input.strip() == "":
-        st.warning("Please enter some text!")
+        st.warning("⚠️ Please enter some text to predict!")
     else:
-        with st.spinner('Predicting...'):
+        with st.spinner('🔮 Predicting sentiment...'):
             model = models[model_choice]
             predicted_class, confidence, all_probs = predict_sentiment(user_input, model)
+        
         st.success(f"🎯 Predicted Sentiment: **{predicted_class}** (Confidence: {confidence:.2f})")
-
+        
         st.subheader("🔍 All Class Probabilities:")
         st.bar_chart(all_probs)
