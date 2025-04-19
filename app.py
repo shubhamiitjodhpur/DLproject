@@ -19,7 +19,7 @@ BASE_URL = "https://huggingface.co/shubhamprabhukhanolkar/mental-health-sentimen
 model_urls = {
     'LSTM': BASE_URL + 'lstm_sentiment_model.keras',
     'BiLSTM': BASE_URL + 'bilstm_sentiment_model.keras',
-    'CNN-BiLSTM': BASE_URL + 'cnn_bilstm_mental_health_sentiment_model.keras',
+    'CNN-BiLSTM': BASE_URL + 'bilstm_sentiment_model.keras',
     'Multi-View': BASE_URL + 'lstm_sentiment_model.keras'
 }
 
