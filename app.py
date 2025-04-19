@@ -76,7 +76,7 @@ with st.spinner('🔄 Loading models...'):
     for name, url in model_urls.items():
         filename = url.split("/")[-1]
         download_file_from_huggingface(url, filename)
-        models[name] = load_model(filename, compile=False)  # 👈 IMPORTANT: compile=False
+        models[name] = load_model(filename, compile=True)  # 👈 IMPORTANT: compile=False
 
 st.success("✅ Models and Tokenizer Loaded!")
 
